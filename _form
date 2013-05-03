@@ -1,0 +1,121 @@
+  <?php $box = $this->beginWidget('bootstrap.widgets.TbBox', array(
+		'title' => 'PRESENSI SISWA',
+		'headerIcon' => 'icon-th-list',
+		'htmlOptions'=>array('class'=>'inline'),
+		// when displaying a table, if we include bootstra-widget-table class
+		// the table will be 0-padding to the box
+	));?>
+	<?php $form=$this->beginWidget('bootstrap.widgets.TbActiveForm',array(
+		'id'=>'presensi-form',
+		'enableAjaxValidation'=>false,
+		'focus'=>array($model,'nisn'),
+	)); ?>
+
+	<!-- <p class="help-block">Fields with <span class="required">*</span> are required.</p> -->
+	<?php echo $form->errorSummary($model); ?>
+	
+	<?php
+	Yii::app()->clientScript->registerScript("combo-change2", "
+		$(document).ready(function(){
+			$('#kelas').$('#lokal').change(function(){
+			sel = $(this);
+			console.log(sel.val());
+				if(sel.val() != '' ){
+					$('#nisn').val(sel.val());
+				}else{
+					$('#nisn').val('');
+				}
+			});
+		});
+	");
+	?>
+	
+	<?php
+	Yii::app()->clientScript->registerScript("combo-change", "
+		$(document).ready(function(){
+			$('#nisn').change(function(){
+			sel = $(this);
+			console.log(sel.val());
+				if(sel.val() != '' ){
+					$('#Presensi_nisn').val(sel.val());
+					$('#Presensi_nisn').attr('disabled', 'disabled');
+				}else{
+					$('#Presensi_nisn').val('');
+					$('#Presensi_nisn').removeAttr('disabled');
+				}
+			});
+		});
+	");
+	?>
+	
+	<?php $kelasArray = CHtml::listData(Siswa::model()->findAll(array(
+		'order'=>'kelas ASC',
+		'distinct' => true
+		)), 'kelas', 'kelas');
+	?>
+	
+	<?php $lokalArray = CHtml::listData(Siswa::model()->findAll(array(
+		'order'=>'lokal ASC',
+		'distinct' => true
+		)), 'lokal', 'lokal');
+	?>
+	
+	<?php echo $form->dropDownList(PenempatanKelas::model()->with(array()), 'kelas', $kelasArray, array('class'=>'span2', 'empty' => '-- Pilih Kelas --', 'id' => 'kelas')); ?>
+	
+	<?php echo $form->dropDownList(PenempatanKelas::model()->with(array()), 'lokal', $lokalArray, array('class'=>'span2', 'empty' => '-- Pilih Lokal --', 'id' => 'lokal')); ?>
+	
+	<?php $SiswaArray = CHtml::listData(Siswa::model()->findAll(array(
+		'order'=>'kelas ASC',
+		'distinct' => true
+		)), 'nisn', 'nama_lengkap'); 
+	?>
+	
+	<?php echo $form->dropDownList($model, 'nisn', $SiswaArray, array('class'=>'span3', 'empty' => '-- Pilih Siswa --', 'id' => 'nisn')); ?>
+	
+	<?php echo $form->textField($model,'nisn', array('class'=>'span2', 'id' => 'Presensi_nisn', 'placeholder'=>'NISN')); ?><br />
+	
+	<?php echo $form->labelEx($model,'status'); ?>
+	<?php
+	    echo $form->radioButtonList($model,'status',
+	    array('S'=>'Sakit', 'I'=>'Izin', 'A'=>'Alpha'),
+	    array(
+	          'template'=>'{input}{label}',
+	          'separator'=>'',
+	          'labelOptions'=>array(
+	                        'style'=> '
+	                                  padding-left:13px;
+	                                  width: 60px;
+	                                  float: left;
+	                                 '),
+	          'style'=>'float:left;',
+	          )                              
+	      );
+	        ?>
+	  <div style="clear: both;"></div>
+	
+	<?php echo $form->hiddenField($model,'tanggal',array('class'=>'span2', 'value'=>date('Y-m-d'))); ?>
+	
+	<?php 
+	$semes=SemesterAktif::model()->findAll(array(
+		'select'=>'*',
+		'order'=>'th_ajar DESC',
+	));
+	foreach ($semes as $i=>$ii):
+	?>
+	
+	<?php echo $form->hiddenField($model,'th_ajar',array('class'=>'span2','maxlength'=>10, 'value'=>$ii['th_ajar'])); ?>
+
+	<?php echo $form->hiddenField($model,'semester',array('class'=>'span1','maxlength'=>1, 'value'=>$ii['semester'])); ?>
+	
+	<?php endforeach; ?>
+	
+	<div class="form-actions">
+		<?php $this->widget('bootstrap.widgets.TbButton', array(
+			'buttonType'=>'submit',
+			'type'=>'warning',
+			'label'=>$model->isNewRecord ? 'Create' : 'Save',
+		)); ?>
+	</div>
+
+<?php $this->endWidget(); ?>
+<?php $this->endWidget(); ?>
